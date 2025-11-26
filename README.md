@@ -153,3 +153,9 @@ Excel / CSV Data Processing
 
   **Dashboard Preview**
   <img width="1252" height="719" alt="Screenshot 2025-11-26 102632" src="https://github.com/user-attachments/assets/2d90a72f-ca1d-46d3-b214-32f03e5f9e45" />
+  <img width="1325" height="744" alt="Screenshot 2025-11-26 102710" src="https://github.com/user-attachments/assets/fb1fe531-0c05-4bd5-8901-ce9f62387ee2" />
+<img width="1324" height="737" alt="Screenshot 2025-11-26 102658" src="https://github.com/user-attachments/assets/7e3f2586-d1d9-4c03-978a-47cd5a60c54e" />
+
+<img width="1326" height="746" alt="Screenshot 2025-11-26 102646" src="https://github.com/user-attachments/assets/6adc5a43-30f4-4650-a26a-20f5cf409e87" />
+
+
