@@ -1,0 +1,260 @@
+-- DAX Studio query: DEFINE measures + EVALUATE results
+-- Assumptions:
+-- 1) There is a Date table in the model: Date[Date] (marked as Date table)
+-- 2) 'Top-50-world' table exists and is related to Date[Date] on 'Top-50-world'[date]
+-- 3) If is_explicit is text, the measures below still work (we normalize using FORMAT/LOWER)
+
+DEFINE
+
+-- BASIC COUNTS
+MEASURE 'Top-50-world'[Total Songs] =
+COUNTROWS( 'Top-50-world' )
+
+MEASURE 'Top-50-world'[Distinct Songs] =
+DISTINCTCOUNT( 'Top-50-world'[song] )
+
+MEASURE 'Top-50-world'[Distinct Artists] =
+DISTINCTCOUNT( 'Top-50-world'[artist] )
+
+
+-- POPULARITY
+MEASURE 'Top-50-world'[Avg Popularity] =
+AVERAGE( 'Top-50-world'[popularity] )
+
+MEASURE 'Top-50-world'[Max Popularity] =
+MAX( 'Top-50-world'[popularity] )
+
+MEASURE 'Top-50-world'[Min Popularity] =
+MIN( 'Top-50-world'[popularity] )
+
+
+-- DURATION (ms -> minutes) using iterators when expression required
+MEASURE 'Top-50-world'[Avg Duration Minutes] =
+AVERAGEX(
+    'Top-50-world',
+    'Top-50-world'[duration_ms] / 60000
+)
+
+MEASURE 'Top-50-world'[Max Duration Minutes] =
+MAXX(
+    'Top-50-world',
+    'Top-50-world'[duration_ms] / 60000
+)
+
+MEASURE 'Top-50-world'[Min Duration Minutes] =
+MINX(
+    'Top-50-world',
+    'Top-50-world'[duration_ms] / 60000
+)
+
+
+-- EXPLICIT (works for boolean or text)
+MEASURE 'Top-50-world'[Explicit Songs] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    FILTER(
+        'Top-50-world',
+        LOWER( FORMAT( 'Top-50-world'[is_explicit], "" ) ) = "true"
+    )
+)
+
+MEASURE 'Top-50-world'[Non-Explicit Songs] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    FILTER(
+        'Top-50-world',
+        LOWER( FORMAT( 'Top-50-world'[is_explicit], "" ) ) <> "true"
+    )
+)
+
+MEASURE 'Top-50-world'[Pct Explicit Songs] =
+DIVIDE( [Explicit Songs], [Total Songs], 0 )
+
+MEASURE 'Top-50-world'[Avg Popularity Explicit] =
+CALCULATE(
+    AVERAGE( 'Top-50-world'[popularity] ),
+    FILTER(
+        'Top-50-world',
+        LOWER( FORMAT( 'Top-50-world'[is_explicit], "" ) ) = "true"
+    )
+)
+
+MEASURE 'Top-50-world'[Avg Popularity NonExplicit] =
+CALCULATE(
+    AVERAGE( 'Top-50-world'[popularity] ),
+    FILTER(
+        'Top-50-world',
+        LOWER( FORMAT( 'Top-50-world'[is_explicit], "" ) ) <> "true"
+    )
+)
+
+
+-- POSITION / RANK
+MEASURE 'Top-50-world'[Avg Position] =
+AVERAGE( 'Top-50-world'[position] )
+
+MEASURE 'Top-50-world'[Position1 Songs] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    'Top-50-world'[position] = 1
+)
+
+MEASURE 'Top-50-world'[Position1 Artists] =
+CALCULATE(
+    DISTINCTCOUNT( 'Top-50-world'[artist] ),
+    'Top-50-world'[position] = 1
+)
+
+MEASURE 'Top-50-world'[Top10 Entries] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    'Top-50-world'[position] <= 10
+)
+
+
+-- ALBUM / TRACKS
+MEASURE 'Top-50-world'[Avg Tracks per Album] =
+AVERAGE( 'Top-50-world'[total_tracks] )
+
+MEASURE 'Top-50-world'[Album Type Count] =
+DISTINCTCOUNT( 'Top-50-world'[album_type] )
+
+MEASURE 'Top-50-world'[Singles Count] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    'Top-50-world'[album_type] = "single"
+)
+
+MEASURE 'Top-50-world'[Albums Count] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    'Top-50-world'[album_type] = "album"
+)
+
+
+-- PER-SONG / PER-ARTIST CONTEXTUAL METRICS
+MEASURE 'Top-50-world'[Entries Per Song] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    ALLEXCEPT( 'Top-50-world', 'Top-50-world'[song] )
+)
+
+MEASURE 'Top-50-world'[Entries Per Artist] =
+CALCULATE(
+    COUNTROWS( 'Top-50-world' ),
+    ALLEXCEPT( 'Top-50-world', 'Top-50-world'[artist] )
+)
+
+MEASURE 'Top-50-world'[Distinct Songs per Artist] =
+CALCULATE(
+    DISTINCTCOUNT( 'Top-50-world'[song] ),
+    ALLEXCEPT( 'Top-50-world', 'Top-50-world'[artist] )
+)
+
+MEASURE 'Top-50-world'[Avg Popularity per Artist] =
+CALCULATE(
+    AVERAGE( 'Top-50-world'[popularity] ),
+    ALLEXCEPT( 'Top-50-world', 'Top-50-world'[artist] )
+)
+
+
+-- TIME-SERIES / TREND MEASURES (using the Date table)
+MEASURE 'Top-50-world'[Song Count Change vs Prev Day] =
+VAR PrevDayCount =
+    CALCULATE(
+        COUNTROWS( 'Top-50-world' ),
+        DATEADD( 'Date'[Date], -1, DAY )
+    )
+RETURN
+    COUNTROWS( 'Top-50-world' ) - PrevDayCount
+
+MEASURE 'Top-50-world'[Popularity Change vs Prev Day] =
+VAR PrevPopularity =
+    CALCULATE(
+        AVERAGE( 'Top-50-world'[popularity] ),
+        DATEADD( 'Date'[Date], -1, DAY )
+    )
+RETURN
+    AVERAGE( 'Top-50-world'[popularity] ) - PrevPopularity
+
+-- RELEASE YEAR / AGE (use X-iterators when expressions required)
+MEASURE 'Top-50-world'[Avg Release Year] =
+AVERAGEX(
+    'Top-50-world',
+    YEAR( 'Top-50-world'[release_date] )
+)
+
+MEASURE 'Top-50-world'[Newest Release Year] =
+MAXX(
+    'Top-50-world',
+    YEAR( 'Top-50-world'[release_date] )
+)
+
+MEASURE 'Top-50-world'[Oldest Release Year] =
+MINX(
+    'Top-50-world',
+    YEAR( 'Top-50-world'[release_date] )
+)
+
+MEASURE 'Top-50-world'[Song Age (Years)] =
+AVERAGEX(
+    'Top-50-world',
+    YEAR( TODAY() ) - YEAR( 'Top-50-world'[release_date] )
+)
+
+
+-- OPTIONAL: 7-day moving average of popularity (example)
+MEASURE 'Top-50-world'[Popularity 7D MA] =
+VAR CurrentDate = MAX( 'Date'[Date] )
+VAR StartDate = CurrentDate - 6
+RETURN
+    AVERAGEX(
+        FILTER(
+            ALL( 'Date' ),
+            'Date'[Date] >= StartDate
+                && 'Date'[Date] <= CurrentDate
+        ),
+        CALCULATE( AVERAGE( 'Top-50-world'[popularity] ) )
+    )
+
+
+-- FINAL OUTPUT: Summarize by artist & song (trim if heavy)
+EVALUATE
+SUMMARIZECOLUMNS(
+    'Top-50-world'[artist],
+    'Top-50-world'[song],
+
+    "Total Songs", [Total Songs],
+    "Distinct Songs", [Distinct Songs],
+    "Distinct Artists", [Distinct Artists],
+    "Avg Popularity", [Avg Popularity],
+    "Max Popularity", [Max Popularity],
+    "Min Popularity", [Min Popularity],
+    "Avg Duration Minutes", [Avg Duration Minutes],
+    "Max Duration Minutes", [Max Duration Minutes],
+    "Min Duration Minutes", [Min Duration Minutes],
+    "Explicit Songs", [Explicit Songs],
+    "Non-Explicit Songs", [Non-Explicit Songs],
+    "Pct Explicit Songs", [Pct Explicit Songs],
+    "Avg Popularity Explicit", [Avg Popularity Explicit],
+    "Avg Popularity NonExplicit", [Avg Popularity NonExplicit],
+    "Avg Position", [Avg Position],
+    "Position1 Songs", [Position1 Songs],
+    "Position1 Artists", [Position1 Artists],
+    "Top10 Entries", [Top10 Entries],
+    "Avg Tracks per Album", [Avg Tracks per Album],
+    "Album Type Count", [Album Type Count],
+    "Singles Count", [Singles Count],
+    "Albums Count", [Albums Count],
+    "Entries Per Song", [Entries Per Song],
+    "Entries Per Artist", [Entries Per Artist],
+    "Distinct Songs per Artist", [Distinct Songs per Artist],
+    "Avg Popularity per Artist", [Avg Popularity per Artist],
+    "Song Count Change vs Prev Day", [Song Count Change vs Prev Day],
+    "Popularity Change vs Prev Day", [Popularity Change vs Prev Day],
+    "Avg Release Year", [Avg Release Year],
+    "Newest Release Year", [Newest Release Year],
+    "Oldest Release Year", [Oldest Release Year],
+    "Song Age (Years)", [Song Age (Years)],
+    "Popularity 7D MA", [Popularity 7D MA]
+)
