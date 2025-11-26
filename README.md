@@ -1,157 +1,242 @@
-# Spotify
-This repository contains a visually rich, fully functional Spotify Analytics Dashboard built using Power BI, leveraging a cleaned dataset derived from Spotify's daily Top-50 charts.
-This project presents a fully interactive Spotify Analytics Dashboard built in Power BI using the Top-50 global streaming dataset.
-The goal of the dashboard is to help music analysts, playlist managers, and marketing teams easily monitor performance indicators across Spotify songs, artists, and albums.
+**Project Documentation – Spotify Analytics Dashboard (Power BI)**
 
-The dashboard transforms raw daily Top-50 ranking data into meaningful KPIs, trends, segmentations, and drill-downs—empowering stakeholders to make data-driven decisions on music promotion, curation, and market strategy.
+📌 1. Project Overview
 
-📄 README.md
-🎧 Spotify Analytics Dashboard – Power BI
+The Spotify Analytics Dashboard is an end-to-end Power BI solution built to analyze the performance of songs, artists, and albums using Spotify’s daily Top 50 charts.
+The objective is to give stakeholders—music analysts, playlist curators, and marketing teams—actionable insights through data visualization and trend analysis.
 
-This repository contains a visually rich, fully functional Spotify Analytics Dashboard built using Power BI, leveraging a cleaned dataset derived from Spotify's daily Top-50 charts.
+📌 2. Business Problem
 
-🚀 Features
-1️⃣ Overview Page
+Spotify provides raw Top-50 lists, but they lack summarization, trend visibility, and comparative analytics. Stakeholders struggle to identify patterns such as:
 
-Provides a high-level snapshot of Spotify’s music performance:
+Which artists consistently dominate the charts
 
-🎵 Total Distinct Songs
+Trends across months and years
 
-👥 Total Artists Count
+Explicit vs non-explicit content performance
 
-⭐ Average Popularity Score
+Distribution of singles vs albums
 
-⏱️ Average Song Duration
+Seasonal spikes in popularity
 
-🔞 Explicit vs Non-Explicit Song Share
+Song duration and popularity patterns
 
-💿 Songs by Album Type (single, album, compilation)
+This project solves these problems by building a centralized analytical dashboard.
 
-📅 Songs & Popularity by Release Year
+📌 3. Project Objectives
+✔ Business-Level Objectives
 
-📈 Monthly Trends
+Provide a unified dashboard summarizing KPIs
 
-Avg Popularity by Month
+Analyze artist & song performance across time
 
-Distinct Songs by Month
+Identify patterns useful for playlist creation and promotions
 
-🏆 Top Artists & Top Songs
+Monitor explicit vs non-explicit song performance
 
-2️⃣ Artist Insights Page
+Understand album type contribution (single/album/compilation)
 
-Drill-down analytics focused on individual artists:
+✔ Technical Objectives
 
-📊 Total Songs by Artist
+Clean and model Spotify Top-50 data
 
-🎼 Artist Album Counts
+Build a star-schema optimized Power BI data model
 
-🔥 Count of Explicit Songs per Artist
+Create DAX measures for KPIs, trends & segmentation
 
-⭐ Popularity Score Contribution
+Develop drill-down pages for Artist and Song analysis
 
-📋 Artist-Level Data Table:
+Implement interactive slicers and dynamic visuals
 
-Song name
-
-Album type
-
-Release year
-
-Avg popularity
-
-Max popularity
-
-Avg duration
-
-3️⃣ Song Insights Page
-
-Song-level deep analysis:
-
-🏆 Top Songs by Popularity
-
-🎧 Song Count Across Album Types
-
-🔞 Explicit/Non-Explicit Distribution
-
-📅 Song performance by month
-
-📋 Detailed Record Table:
-
-Song
-
-Artist(s)
-
-Album type
-
-Song age
-
-Release date
-
-Popularity (avg & max)
-
-Duration
-
-📊 Dataset Schema
+📌 4. Data Source & Schema
+Dataset: Spotify Daily Top-50 Dataset
+File Format: CSV
+Columns Used
 Column Name	Description
 date	Chart date
-position	Spotify Top-50 rank
+position	Top 50 ranking
 song	Track name
 artist	Artist(s)
-popularity	Popularity score (0–100)
-duration_ms	Song duration in milliseconds
+popularity	Popularity score
+duration_ms	Song duration
 album_type	album / single / compilation
-total_tracks	Total tracks in the album
+total_tracks	Tracks in the album
 release_date	Release year
-is_explicit	True / False
-album_cover_url	Album artwork
-🧠 Business Requirements Solved
-✔ KPI Monitoring
+is_explicit	True/False
+album_cover_url	Cover art
+📌 5. Data Cleaning & Transformation
 
-Instant view of total songs, artists, popularity, and durations.
+Performed in Power Query:
 
-✔ Explicit vs Non-Explicit Analysis
+Converted date formats
 
-Shows how explicit content performs compared to non-explicit.
+Extracted year from release_date
 
-✔ Album Type Distribution
+Converted duration (ms to minutes)
 
-Helps identify whether singles or albums dominate charts.
+Removed duplicates and nulls
 
-✔ Trend Analysis
+Split multiple artists where required
 
-Monthly and yearly shifts in song popularity and distinct song count.
+Categorized album types
 
-✔ Connected Insights
+📌 6. Data Modeling
+Model Type: Star Schema
 
-Overview → Artist page → Song page
-Creates a complete analysis flow from macro to micro level.
+Fact Table:
 
-✔ Actionable Insights for Spotify Teams
+Fact_Songs (song metrics)
 
-Identify trending artists
+Dimension Tables:
 
-Understand what type of music performs best
+Dim_Artists
 
-Support playlist creation decisions
+Dim_Album
 
-Recognize seasonal patterns
+Dim_Date
 
-Detect high-performing explicit/non-explicit songs
+Relationships:
 
-🛠️ Technologies Used
+Date → Fact (1:Many)
+
+Artist → Fact (1:Many)
+
+Album → Fact (1:Many)
+
+📌 7. DAX Measures Developed
+
+Examples include:
+
+Total Songs
+
+Distinct Artists
+
+Avg Popularity
+
+Avg Duration (Min)
+
+Count of Explicit Songs
+
+Songs by Album Type
+
+Monthly Trend Measures
+
+Year-wise Distinct Song Count
+
+📌 8. Dashboard Pages & Features
+🔹 1. Overview Page
+
+Total Distinct Songs
+
+Total Artists
+
+Avg Popularity
+
+Avg Duration
+
+Explicit vs Non-Explicit Breakdown
+
+Album Type Distribution
+
+Songs by Year
+
+Monthly Trends
+
+Top Artists
+
+Top Songs
+
+🔹 2. Artist Page
+
+Total Songs by Artist
+
+Artist Album Count
+
+Explicit Songs Count
+
+Popularity Contribution
+
+Artist Data Table (song, year, popularity, duration)
+
+Artist-level drill-through capability
+
+🔹 3. Songs Page
+
+Top Songs by Popularity
+
+Songs by Album Type
+
+Explicit vs Non-Explicit at Song Level
+
+Monthly Song Count
+
+Detailed Table (song, artist, release date, duration, popularity)
+
+📌 9. Key Insights Identified
+
+Singles dominate the Top-50 lists
+
+Explicit songs have high representation but slightly lower average popularity
+
+Peak chart activity occurs around July–September
+
+A small group of artists produce the majority of hits
+
+Duration sweet spot lies around 3–3.5 minutes
+
+Certain months show significant drops in song popularity
+
+📌 10. Business Impact
+
+With this dashboard, Spotify teams can now:
+
+Quickly identify high-performing songs & artists
+
+Understand content trends across months and years
+
+Align marketing campaigns with seasonal patterns
+
+Optimize playlist creation
+
+Promote artists based on data-backed insights
+
+Track the performance of explicit vs clean versions
+
+📌 11. Tools & Technologies
 
 Power BI Desktop
 
-DAX (Data Analysis Expressions)
+DAX
 
 Power Query
 
-Spotify Dataset (Top-50 Daily Data)
+Excel / CSV
 
-Excel / CSV Data Processing
+Spotify Dataset
 
+📌 12. How to Use
 
-  **Dashboard Preview**
+Download the .pbix file
+
+Place the dataset in the same folder
+
+Refresh data source path in Power BI
+
+Explore visuals with slicers and drilldowns
+
+📌 13. Future Enhancements
+
+Connect to Spotify API for live data
+
+Add Genre-wise analytics
+
+Integrate AI Insights using Fabric
+
+Playlist recommendation model
+
+📌 14. Screenshots
+
+**Dashboard Preview**
   <img width="1252" height="719" alt="Screenshot 2025-11-26 102632" src="https://github.com/user-attachments/assets/2d90a72f-ca1d-46d3-b214-32f03e5f9e45" />
   <img width="1325" height="744" alt="Screenshot 2025-11-26 102710" src="https://github.com/user-attachments/assets/fb1fe531-0c05-4bd5-8901-ce9f62387ee2" />
 <img width="1324" height="737" alt="Screenshot 2025-11-26 102658" src="https://github.com/user-attachments/assets/7e3f2586-d1d9-4c03-978a-47cd5a60c54e" />
@@ -159,3 +244,12 @@ Excel / CSV Data Processing
 <img width="1326" height="746" alt="Screenshot 2025-11-26 102646" src="https://github.com/user-attachments/assets/6adc5a43-30f4-4650-a26a-20f5cf409e87" />
 
 
+
+📌 15. Author
+
+Vijay Kumar Metta
+Power BI Developer 
+
+
+
+  
